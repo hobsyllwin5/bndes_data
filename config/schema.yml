@@ -1,0 +1,94 @@
+# Configurações de Schema e Tipos de Dados
+# Arquivo específico para definições de tabelas do projeto BNDES
+
+# Configurações da tabela principal
+desembolsos_por_uf:
+  table_name: "desembolsos_por_uf"
+  columns:
+    id:
+      type: "SERIAL"
+      constraints: "PRIMARY KEY"
+      description: "ID único auto-incrementado"
+    ano:
+      type: "INTEGER"
+      constraints: "NOT NULL"
+      description: "Ano do desembolso"
+    mes:
+      type: "INTEGER"
+      constraints: "NOT NULL"
+      description: "Mês do desembolso"
+    periodo:
+      type: "DATE"
+      constraints: "NOT NULL"
+      description: "Data do período (ex: 1995-01-01)"
+    uf:
+      type: "VARCHAR(2)"
+      constraints: "NOT NULL"
+      description: "Código UF padronizado (ex: SP, RJ)"
+    valor_desembolso:
+      type: "DECIMAL(12,2)"
+      constraints: ""
+      description: "Valor do desembolso em reais (centavos)"
+    updated_at:
+      type: "TIMESTAMP"
+      constraints: "DEFAULT NOW()"
+      description: "Data de atualização do registro"
+  
+  indexes:
+    - name: "idx_desembolsos_periodo"
+      columns: ["periodo"]
+    - name: "idx_desembolsos_uf"
+      columns: ["uf"]
+    - name: "idx_desembolsos_ano"
+      columns: ["ano"]
+    - name: "idx_desembolsos_ano_mes"
+      columns: ["ano", "mes"]
+
+# Mapeamento de estados para códigos UF
+estado_para_uf:
+  acre: "AC"
+  alagoas: "AL"
+  amapa: "AP"
+  amazonas: "AM"
+  bahia: "BA"
+  ceara: "CE"
+  distrito_federal: "DF"
+  espirito_santo: "ES"
+  goias: "GO"
+  maranhao: "MA"
+  mato_grosso: "MT"
+  mato_grosso_do_sul: "MS"
+  minas_gerais: "MG"
+  para: "PA"
+  paraiba: "PB"
+  parana: "PR"
+  pernambuco: "PE"
+  piaui: "PI"
+  rio_de_janeiro: "RJ"
+  rio_grande_do_norte: "RN"
+  rio_grande_do_sul: "RS"
+  rondonia: "RO"
+  roraima: "RR"
+  santa_catarina: "SC"
+  sao_paulo: "SP"
+  sergipe: "SE"
+  tocantins: "TO"
+
+# Configurações de transformação
+transformacao:
+  colunas_controle:
+    - "_id"
+    - "ano"
+    - "mes"
+    - "rank"
+    - "updated_at"
+  
+  validacao:
+    valor_minimo: 0
+    valor_maximo: 999999999
+    casas_decimais: 2
+    
+  formato_periodo:
+    tipo: "date"  # YYYY-MM-DD
+    exemplo: "1995-01-01"
+ 

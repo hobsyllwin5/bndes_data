@@ -1,0 +1,32 @@
+FROM apache/airflow:2.8.1-python3.11
+
+USER root
+
+# Instalar dependências do sistema
+RUN apt-get update && apt-get install -y \
+    netcat-traditional \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+USER airflow
+
+# Copiar requirements
+COPY requirements.txt /tmp/requirements.txt
+
+# Instalar dependências Python (incluindo boto3 para S3/MinIO)
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
+
+# Instalar providers do Airflow
+RUN pip install --no-cache-dir \
+    apache-airflow-providers-amazon==8.17.0 \
+    apache-airflow-providers-postgres==5.10.0
+
+# Copiar arquivos do projeto
+COPY libs/ /opt/airflow/libs/
+COPY config/ /opt/airflow/config/
+COPY bndes_data_explorer.py /opt/airflow/
+COPY airflow_setup.py /opt/airflow/
+# Setup script não é mais necessário - configuração via docker-compose
+
+# Configurar PYTHONPATH
+ENV PYTHONPATH="/opt/airflow:${PYTHONPATH}" 

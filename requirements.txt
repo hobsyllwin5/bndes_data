@@ -1,0 +1,6 @@
+pandas==2.1.4
+pyyaml==6.0.1
+ckanapi==4.7
+boto3>=1.26.0
+minio==7.2.0
+requests==2.32.3 

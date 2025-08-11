@@ -1,0 +1,52 @@
+# Configurações da API BNDES
+api:
+  base_url: "https://dadosabertos.bndes.gov.br/api/3/action"
+  resources:
+    - id: "51094971-4f4f-4c43-9912-3b2f1c9c60ed"
+      name: "desembolsos_por_uf"
+      description: "desembolsos do BNDES por Unidade Federativa"
+      limit: 1000
+
+# Configurações de armazenamento
+storage:
+  data_dir: "dados_bndes"  # Caminho local
+  db_file: "bndes_data.db"
+  log_file: "etl_log.txt"
+
+# Configurações de processamento
+processing:
+  default_limit: 1000
+  batch_size: 5000
+
+# Configurações do MinIO (S3)
+minio:
+  endpoint_url: "http://minio:9000"  # Para containers Docker
+  endpoint_url_local: "http://localhost:9000"  # Para desenvolvimento local
+  access_key: "minioadmin"
+  secret_key: "minioadmin123"
+  bucket_name: "bndes-data"
+  region: "us-east-1"
+
+# Configurações do Banco de Dados
+database:
+  type: "postgresql"
+  host: "postgres"
+  port: 5432
+  database: "bndes_data"
+  user: "bndes_user"
+  password: "bndes_password"
+  schema: "bndes"
+
+# Configurações do Airflow
+airflow:
+  webserver_url: "http://localhost:8080"
+  admin_username: "admin"
+  admin_password: "admin"
+  admin_email: "admin@bndes.local"
+
+# Configurações do Metabase
+metabase:
+  url: "http://metabase:3000"
+  database_name: "BNDES Data"
+  admin_email: "admin@bndes.local"
+  admin_password: "*adminpasswd123"

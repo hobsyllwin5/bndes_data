@@ -1,0 +1,92 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+*.egg-info/
+.pytest_cache/
+
+# Docker
+.dockerignore
+
+# Airflow
+airflow.cfg
+airflow_logs/
+*.pid
+logs/
+standalone_admin_password.txt
+
+# MinIO Data (dados podem ser grandes)
+minio_data/
+*.parquet
+*.csv
+*.json
+
+# PostgreSQL
+*.sql
+*.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+*.out
+*.err
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# Backup files
+*.bak
+*.backup
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Config files with secrets
+config/secrets.yml
+config/production.yml
+
+# Cache
+.cache/
+*.cache
+
+# Build artifacts
+build/
+dist/
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+
+# Documentation builds
+docs/_build/
+docs/site/ 
