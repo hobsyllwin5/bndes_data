@@ -32,7 +32,7 @@ dag = DAG(
 
 
 def extract_bndes_data(**context):
-    print("🚀 Iniciando extração de dados do BNDES...")
+    print("Iniciando extração de dados do BNDES...")
     
     resources = ConfigYml.get_resources()
     if not resources:

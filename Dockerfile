@@ -1,20 +1,29 @@
 FROM apache/airflow:2.8.1-python3.11
 
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PIP_NO_CACHE_DIR=1
+
 USER root
 
 # Instalar dependências do sistema
 RUN apt-get update && apt-get install -y \
     netcat-traditional \
+    gcc \
+    g++ \
+    libpq-dev \
+    curl \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 USER airflow
 
 # Copiar requirements
-COPY requirements.txt /tmp/requirements.txt
+COPY requirements.txt ./
 
-# Instalar dependências Python (incluindo boto3 para S3/MinIO)
-RUN pip install --no-cache-dir -r /tmp/requirements.txt
+# Instalar dependências Python
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Instalar providers do Airflow
 RUN pip install --no-cache-dir \
@@ -22,11 +31,10 @@ RUN pip install --no-cache-dir \
     apache-airflow-providers-postgres==5.10.0
 
 # Copiar arquivos do projeto
-COPY libs/ /opt/airflow/libs/
-COPY config/ /opt/airflow/config/
-COPY bndes_data_explorer.py /opt/airflow/
-COPY airflow_setup.py /opt/airflow/
-# Setup script não é mais necessário - configuração via docker-compose
+COPY . .
 
 # Configurar PYTHONPATH
-ENV PYTHONPATH="/opt/airflow:${PYTHONPATH}" 
+ENV PYTHONPATH="/opt/airflow:${PYTHONPATH}"
+
+# Definir entrypoint
+ENTRYPOINT ["python", "entrypoint.py"] 
