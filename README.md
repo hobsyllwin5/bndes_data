@@ -1,4 +1,4 @@
-# 🚀 BNDES Data Pipeline
+# BNDES Data Pipeline
 
 Pipeline de dados automatizado para extração, transformação e visualização de dados do BNDES (Banco Nacional de Desenvolvimento Econômico e Social).
 
@@ -23,7 +23,7 @@ API BNDES → Airflow → MinIO (Data Lake) → PostgreSQL → Metabase (BI)
 - **MinIO**: Data Lake para armazenamento de dados brutos
 - **Metabase**: Interface de BI para dashboards e visualizações
 
-## 🚀 Início Rápido
+## Início Rápido
 
 ### Pré-requisitos
 - Docker & Docker Compose
@@ -34,9 +34,9 @@ API BNDES → Airflow → MinIO (Data Lake) → PostgreSQL → Metabase (BI)
 make bndes-start
 ```
 Este comando irá:
-- Subir todos os containers BNDES
-- Configurar o Metabase automaticamente
-- Conectar ao banco BNDES
+- Subir todos os containers necessários
+- Configurar automaticamente o Airflow
+- Configurar o Metabase
 - Deixar tudo pronto para uso
 
 ### 2. Executar pipeline de dados
@@ -60,11 +60,11 @@ Este comando extrai dados do BNDES e carrega no PostgreSQL.
 
 Execute `make help` para ver todos os comandos:
 
-### Comandos Principais BNDES
-- `make bndes-start` - Inicia infraestrutura BNDES completa
-- `make bndes-stop` - Para toda a infraestrutura BNDES
+### Comandos Principais
+- `make bndes-start` - Inicia infraestrutura completa
+- `make bndes-stop` - Para toda a infraestrutura
 - `make bndes-pipeline` - Executa pipeline de dados completo
-- `make bndes-status` - Status dos serviços BNDES
+- `make bndes-status` - Status dos serviços
 - `make bndes-restart` - Reinicia toda a infraestrutura
 - `make bndes-data` - Verifica dados carregados no PostgreSQL
 
@@ -73,11 +73,12 @@ Execute `make help` para ver todos os comandos:
 - `make clean` - Remove tudo (reset completo)
 - `make dev` - Modo desenvolvimento (logs em tempo real)
 - `make build` - Reconstrói imagens do Airflow
+- `make entrypoint-logs` - Logs específicos do sistema de inicialização
 
 ### Atalhos Úteis
 - `make airflow` - Acessa bash do container Airflow
-- `make postgres` - Acessa psql do PostgreSQL BNDES
-- `make minio` - Informações do MinIO BNDES
+- `make postgres` - Acessa psql do PostgreSQL
+- `make minio` - Informações do MinIO
 
 ## 📊 Dados Disponíveis
 
@@ -98,6 +99,8 @@ bndes_project/
 ├── config/                   # Configurações
 ├── libs/                     # Bibliotecas compartilhadas
 ├── docker-compose.yml        # Infraestrutura
+├── Dockerfile                # Imagem customizada do Airflow
+├── entrypoint.py             # Script de inicialização automática
 ├── Makefile                  # Automação
 └── README.md
 ```
@@ -125,6 +128,9 @@ make bndes-data
 
 # Acessar PostgreSQL diretamente
 make postgres
+
+# Ver logs do sistema de inicialização
+make entrypoint-logs
 ```
 
 ## 🐛 Solução de Problemas
@@ -152,6 +158,97 @@ Certifique-se que as portas estão livres:
 - 8080 (Airflow)
 - 5432 (PostgreSQL)
 - 9000/9001 (MinIO)
+
+## 🔧 Configuração do Airflow
+
+### DAGs Disponíveis
+
+#### bndes_data_extraction
+- **Frequência**: Diária (`@daily`)
+- **Horário**: 00:00 UTC
+- **Retry**: 2 tentativas com 5min de intervalo
+- **Tasks**:
+  1. `extract_bndes_data`: Extrai dados da API
+  2. `validate_data_quality`: Valida qualidade dos dados
+
+### Personalizar DAGs
+Edite: `dags/bndes_extraction_dag.py`
+
+```python
+# Alterar frequência
+schedule_interval='@weekly'  # ou '0 6 * * *' para 6h da manhã
+
+# Adicionar mais validações
+def validate_data_quality(**context):
+    # Suas validações customizadas aqui
+    pass
+```
+
+### Troubleshooting
+
+#### DAG não aparece:
+```bash
+# Verificar erros de sintaxe
+docker-compose exec airflow-webserver airflow dags list
+
+# Verificar logs do scheduler
+docker-compose logs airflow-scheduler
+```
+
+#### Logs não aparecem no MinIO:
+```bash
+# Verificar conexão minio_s3
+docker-compose exec airflow-webserver airflow connections list
+
+# Testar conexão manualmente
+docker-compose exec airflow-webserver python -c "
+import boto3
+s3 = boto3.client('s3', endpoint_url='http://minio:9000', 
+                  aws_access_key_id='minioadmin', 
+                  aws_secret_access_key='minioadmin123')
+print(s3.list_buckets())
+"
+```
+
+#### Erro de extração:
+1. Verificar se MinIO está rodando
+2. Verificar configuração em `config/config.yml`
+3. Testar script manualmente: `python bndes_data_explorer.py`
+
+#### Problemas de inicialização:
+```bash
+# Ver logs do sistema de inicialização
+make entrypoint-logs
+
+# Verificar health checks
+docker-compose ps
+
+# Rebuild se necessário
+docker-compose down -v
+docker-compose build
+docker-compose up
+```
+
+### Logs e Monitoramento
+
+#### Logs Remotos no MinIO:
+- **Logs do Airflow** salvos em: `s3://airflow-logs`
+- **Dados BNDES** salvos em: `s3://bndes-data`
+- **Interface MinIO**: http://localhost:9001
+
+#### Comandos úteis para monitoramento:
+```bash
+# Ver logs em tempo real
+docker-compose logs -f airflow-scheduler
+docker-compose logs -f airflow-worker
+
+# Reiniciar serviços específicos
+docker-compose restart airflow-webserver
+docker-compose restart airflow-scheduler
+
+# Acessar container para debug
+docker-compose exec airflow-webserver bash
+```
 
 ## 📈 Roadmap
 

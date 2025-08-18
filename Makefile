@@ -13,13 +13,14 @@ NC = \033[0m # No Color
 
 # Comando padrão
 help: ## Mostra esta ajuda
-	@echo "$(BLUE)🚀 BNDES Data Pipeline Project$(NC)"
+	@echo "$(BLUE)BNDES Data Pipeline Project$(NC)"
 	@echo ""
 	@echo "$(YELLOW)Comandos principais:$(NC)"
 	@echo "  $(GREEN)bndes-start$(NC)     Inicia infraestrutura BNDES completa"
 	@echo "  $(GREEN)bndes-pipeline$(NC)  Executa pipeline de dados (extração + transformação)"
 	@echo "  $(GREEN)bndes-stop$(NC)      Para toda a infraestrutura"
 	@echo "  $(GREEN)bndes-status$(NC)    Status dos serviços BNDES"
+	@echo "  $(GREEN)entrypoint-logs$(NC) Logs específicos do entrypoint (nova funcionalidade)"
 	@echo ""
 	@echo "$(YELLOW)Todos os comandos:$(NC)"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(GREEN)%-18s$(NC) %s\n", $$1, $$2}'
@@ -30,7 +31,7 @@ help: ## Mostra esta ajuda
 	@echo "  3. Acesse http://localhost:3000 (Metabase)"
 
 bndes-start: ## Inicia infraestrutura BNDES completa (recomendado)
-	@echo "$(BLUE)🚀 Iniciando infraestrutura BNDES...$(NC)"
+	@echo "$(BLUE)Iniciando infraestrutura BNDES...$(NC)"
 	@docker-compose -f $(COMPOSE_FILE) down 2>/dev/null || true
 	@echo "$(YELLOW)📦 Subindo containers BNDES...$(NC)"
 	@docker-compose -f $(COMPOSE_FILE) up -d
@@ -75,7 +76,7 @@ bndes-setup: ## Configura Metabase automaticamente para BNDES
 		exit 1; \
 	fi
 	@echo "$(GREEN)✅ Metabase está rodando!$(NC)"
-	@echo "$(YELLOW)🚀 Configuração manual necessária:$(NC)"
+	@echo "$(YELLOW)Configuração manual necessária:$(NC)"
 	@echo "  • Acesse: http://localhost:3000"
 	@echo "  • Email: bndes_data@student.com"
 	@echo "  • Senha: bndes_data123"
@@ -123,13 +124,17 @@ logs: ## Logs em tempo real dos serviços principais
 	@echo "$(BLUE)📋 Logs da infraestrutura BNDES:$(NC)"
 	@docker-compose -f $(COMPOSE_FILE) logs --tail=50 -f airflow-webserver airflow-scheduler bndes_metabase bndes_postgres
 
+entrypoint-logs: ## Logs específicos do entrypoint (nova funcionalidade)
+	@echo "$(BLUE)Logs do entrypoint do Airflow:$(NC)"
+	@docker-compose -f $(COMPOSE_FILE) logs airflow-webserver | grep "✅\|❌\|⏳\|🔍\|🗄️\|👤\|🏊\|🔧"
+
 dev: ## Modo desenvolvimento - sobe com logs em tempo real
 	@echo "$(BLUE)🛠️ Modo desenvolvimento BNDES - logs em tempo real$(NC)"
 	@docker-compose -f $(COMPOSE_FILE) up
 
 build: ## Reconstrói imagens do Airflow (desenvolvimento)
 	@echo "$(YELLOW)🔨 Reconstruindo imagem do Airflow...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) build --no-cache airflow-build
+	@docker-compose -f $(COMPOSE_FILE) build --no-cache
 
 reset: clean bndes-start ## Reset completo - limpa tudo e reinicia
 
@@ -144,8 +149,4 @@ minio: ## Informações do MinIO BNDES
 	@echo "$(BLUE)MinIO Console BNDES: http://localhost:9001$(NC)"
 	@echo "$(YELLOW)User: minioadmin | Password: minioadmin123$(NC)"
 
-# Aliases para compatibilidade (deprecated)
-up: bndes-start ## [DEPRECATED] Use bndes-start
-down: bndes-stop ## [DEPRECATED] Use bndes-stop
-status: bndes-status ## [DEPRECATED] Use bndes-status
-run-dags: bndes-pipeline ## [DEPRECATED] Use bndes-pipeline 
+ 

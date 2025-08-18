@@ -27,6 +27,11 @@ services:
       POSTGRES_PASSWORD: airflow
     volumes:
       - airflow_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow -d airflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - bndes_network
 
@@ -34,6 +39,11 @@ services:
   redis:
     image: redis:7
     container_name: airflow_redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - bndes_network
 
@@ -41,7 +51,7 @@ services:
   airflow-build:
     build:
       context: .
-      dockerfile: Dockerfile.airflow
+      dockerfile: Dockerfile
     image: bndes-airflow:latest
     command: ["echo", "Build completed"]
 
@@ -50,10 +60,10 @@ services:
     image: bndes-airflow:latest
     container_name: airflow_webserver
     depends_on:
-      - airflow-postgres
-      - redis
-      - airflow-build
-      - airflow-init
+      airflow-postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       AIRFLOW__CORE__EXECUTOR: CeleryExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-postgres/airflow
@@ -90,10 +100,10 @@ services:
     image: bndes-airflow:latest
     container_name: airflow_scheduler
     depends_on:
-      - airflow-postgres
-      - redis
-      - airflow-build
-      - airflow-init
+      airflow-postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       AIRFLOW__CORE__EXECUTOR: CeleryExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-postgres/airflow
@@ -126,10 +136,10 @@ services:
     image: bndes-airflow:latest
     container_name: airflow_worker
     depends_on:
-      - airflow-postgres
-      - redis
-      - airflow-build
-      - airflow-init
+      airflow-postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       AIRFLOW__CORE__EXECUTOR: CeleryExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-postgres/airflow
@@ -155,53 +165,7 @@ services:
     networks:
       - bndes_network
 
-  # Airflow Init
-  airflow-init:
-    image: bndes-airflow:latest
-    container_name: airflow_init
-    depends_on:
-      - airflow-postgres
-      - minio
-      - airflow-build
-    environment:
-      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
-      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-postgres/airflow
-      AIRFLOW__CORE__FERNET_KEY: ''
-      # Remote Logging Configuration (MinIO)
-      AIRFLOW__LOGGING__REMOTE_LOGGING: 'true'
-      AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: 's3://airflow-logs'
-      AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: 'minio_s3'
-      # MinIO/S3 Configuration
-      AWS_ACCESS_KEY_ID: 'minioadmin'
-      AWS_SECRET_ACCESS_KEY: 'minioadmin123'
-      AIRFLOW__LOGGING__S3_LOG_FOLDER: 's3://airflow-logs'
-      PYTHONPATH: /opt/airflow
-    volumes:
-      - ./dags:/opt/airflow/dags
-      - airflow_logs:/opt/airflow/logs
-      - ./plugins:/opt/airflow/plugins
-      - ./libs:/opt/airflow/libs
-      - ./config:/opt/airflow/config
-    command: >
-      bash -c "
-        echo '🚀 Iniciando setup do Airflow...' &&
-        echo '⏳ Aguardando PostgreSQL...' &&
-        while ! nc -z airflow-postgres 5432; do sleep 1; done &&
-        echo '⏳ Aguardando MinIO...' &&
-        while ! nc -z minio 9000; do sleep 1; done &&
-        echo '🗄️ Inicializando banco...' &&
-        airflow db migrate &&
-        echo '👤 Criando usuário admin...' &&
-        airflow users create --username admin --firstname Admin --lastname User --role Admin --email admin@example.com --password admin ||
-        airflow users create --username admin --firstname Admin --lastname User --role Admin --email admin@example.com --password admin --replace &&
-        echo '🪣 Criando bucket para logs...' &&
-        python3 -c 'import boto3; from botocore.exceptions import ClientError; s3=boto3.client(\"s3\", endpoint_url=\"http://minio:9000\", aws_access_key_id=\"minioadmin\", aws_secret_access_key=\"minioadmin123\", region_name=\"us-east-1\"); s3.create_bucket(Bucket=\"airflow-logs\") if not any(b[\"Name\"]==\"airflow-logs\" for b in s3.list_buckets()[\"Buckets\"]) else print(\"Bucket já existe\"); print(\"✅ Bucket configurado\")' &&
-        echo '🔧 Configurando conexões...' &&
-        python3 /opt/airflow/airflow_setup.py &&
-        echo '✅ Setup do Airflow concluído!'
-      "
-    networks:
-      - bndes_network
+
 
 
 
