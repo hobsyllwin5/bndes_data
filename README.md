@@ -50,8 +50,8 @@ Este comando extrai dados do BNDES e carrega no PostgreSQL.
   - Email: `bndes_data@student.com`
   - Senha: `bndes_data123`
 - **Airflow**: http://localhost:8080
-  - Usuário: `admin`
-  - Senha: `admin`
+  - Usuário: `airflow`
+  - Senha: `airflow`
 - **MinIO**: http://localhost:9001
   - Usuário: `minioadmin`
   - Senha: `minioadmin123`

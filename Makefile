@@ -41,7 +41,7 @@ bndes-start: ## Inicia infraestrutura BNDES completa (recomendado)
 	@echo ""
 	@echo "$(GREEN)✅ Infraestrutura BNDES pronta!$(NC)"
 	@echo "$(YELLOW)🌐 Serviços disponíveis:$(NC)"
-	@echo "  • Airflow:  http://localhost:8080 (admin/admin)"
+	@echo "  • Airflow:  http://localhost:8080 (airflow/airflow)"
 	@echo "  • Metabase: http://localhost:3000 (bndes_data@student.com/bndes_data123)"
 	@echo "  • MinIO:    http://localhost:9001 (minioadmin/minioadmin123)"
 
@@ -53,12 +53,12 @@ bndes-stop: ## Para toda a infraestrutura BNDES
 bndes-pipeline: ## Executa pipeline completo de dados BNDES
 	@echo "$(BLUE)🔄 Executando pipeline de dados BNDES...$(NC)"
 	@echo "$(YELLOW)1. Executando extração de dados BNDES...$(NC)"
-	@curl -s -X POST -u admin:admin "http://localhost:8080/api/v1/dags/bndes_extraction/dagRuns" \
+	@curl -s -X POST -u airflow:airflow "http://localhost:8080/api/v1/dags/bndes_extraction/dagRuns" \
 		-H "Content-Type: application/json" \
 		-d '{"dag_run_id":"manual_$$(date +%Y%m%d_%H%M%S)", "conf":{}}' > /dev/null || echo "$(RED)Erro na extração$(NC)"
 	@sleep 10
 	@echo "$(YELLOW)2. Executando transformação e carga...$(NC)"
-	@curl -s -X POST -u admin:admin "http://localhost:8080/api/v1/dags/bndes_transformation/dagRuns" \
+	@curl -s -X POST -u airflow:airflow "http://localhost:8080/api/v1/dags/bndes_transformation/dagRuns" \
 		-H "Content-Type: application/json" \
 		-d '{"dag_run_id":"manual_$$(date +%Y%m%d_%H%M%S)", "conf":{}}' > /dev/null || echo "$(RED)Erro na transformação$(NC)"
 	@echo "$(GREEN)✅ Pipeline BNDES executado! Acompanhe em http://localhost:8080$(NC)"

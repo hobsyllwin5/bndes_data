@@ -151,12 +151,12 @@ def create_admin_user():
         # Tentar criar usuário
         subprocess.run([
             "airflow", "users", "create",
-            "--username", "admin",
+            "--username", "airflow",
             "--firstname", "Admin",
             "--lastname", "User",
             "--role", "Admin",
             "--email", "admin@example.com",
-            "--password", "admin"
+            "--password", "airflow"
         ], check=True, capture_output=True)
         print("✅ Usuário admin criado com sucesso")
     except subprocess.CalledProcessError:
@@ -164,12 +164,12 @@ def create_admin_user():
             # Se falhar, tentar substituir
             subprocess.run([
                 "airflow", "users", "create",
-                "--username", "admin",
+                "--username", "airflow",
                 "--firstname", "Admin",
                 "--lastname", "User",
                 "--role", "Admin",
                 "--email", "admin@example.com",
-                "--password", "admin",
+                "--password", "airflow",
                 "--replace"
             ], check=True, capture_output=True)
             print("✅ Usuário admin atualizado com sucesso")
