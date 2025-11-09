@@ -1,4 +1,3 @@
-# Configurações de Schema e Tipos de Dados
 # Arquivo específico para definições de tabelas do projeto BNDES
 
 # Configurações da tabela principal
@@ -73,6 +72,73 @@ estado_para_uf:
   sao_paulo: "SP"
   sergipe: "SE"
   tocantins: "TO"
+
+# Tabela de informações geográficas dos estados
+estados_info:
+  table_name: "estados_info"
+  columns:
+    uf:
+      type: "VARCHAR(2)"
+      constraints: "PRIMARY KEY"
+      description: "Código UF (AC, AL, AP, etc.)"
+    nome_estado:
+      type: "VARCHAR(50)"
+      constraints: "NOT NULL"
+      description: "Nome completo do estado"
+    nome_capital:
+      type: "VARCHAR(50)"
+      constraints: "NOT NULL"
+      description: "Nome da capital"
+    latitude:
+      type: "DECIMAL(10,7)"
+      constraints: "NOT NULL"
+      description: "Latitude da capital (coordenada geográfica)"
+    longitude:
+      type: "DECIMAL(10,7)"
+      constraints: "NOT NULL"
+      description: "Longitude da capital (coordenada geográfica)"
+    regiao:
+      type: "VARCHAR(20)"
+      constraints: "NOT NULL"
+      description: "Região (Norte, Nordeste, Centro-Oeste, Sudeste, Sul)"
+    area_km2:
+      type: "INTEGER"
+      constraints: ""
+      description: "Área do estado em km²"
+  
+  indexes:
+    - name: "idx_estados_regiao"
+      columns: ["regiao"]
+
+# Dados estáticos dos estados brasileiros (coordenadas das capitais)
+dados_estados:
+  AC: {nome: "Acre", capital: "Rio Branco", lat: -9.9754, lng: -67.8249, regiao: "Norte", area: 164123}
+  AL: {nome: "Alagoas", capital: "Maceió", lat: -9.6498, lng: -35.7089, regiao: "Nordeste", area: 27778}
+  AP: {nome: "Amapá", capital: "Macapá", lat: 0.0349, lng: -51.0694, regiao: "Norte", area: 142815}
+  AM: {nome: "Amazonas", capital: "Manaus", lat: -3.1190, lng: -60.0217, regiao: "Norte", area: 1570746}
+  BA: {nome: "Bahia", capital: "Salvador", lat: -12.9714, lng: -38.5014, regiao: "Nordeste", area: 564693}
+  CE: {nome: "Ceará", capital: "Fortaleza", lat: -3.7319, lng: -38.5267, regiao: "Nordeste", area: 148920}
+  DF: {nome: "Distrito Federal", capital: "Brasília", lat: -15.7939, lng: -47.8828, regiao: "Centro-Oeste", area: 5802}
+  ES: {nome: "Espírito Santo", capital: "Vitória", lat: -20.3155, lng: -40.3128, regiao: "Sudeste", area: 46077}
+  GO: {nome: "Goiás", capital: "Goiânia", lat: -16.6869, lng: -49.2648, regiao: "Centro-Oeste", area: 340087}
+  MA: {nome: "Maranhão", capital: "São Luís", lat: -2.5987, lng: -44.2075, regiao: "Nordeste", area: 331983}
+  MT: {nome: "Mato Grosso", capital: "Cuiabá", lat: -15.6014, lng: -56.0979, regiao: "Centro-Oeste", area: 903357}
+  MS: {nome: "Mato Grosso do Sul", capital: "Campo Grande", lat: -20.4697, lng: -54.6201, regiao: "Centro-Oeste", area: 357125}
+  MG: {nome: "Minas Gerais", capital: "Belo Horizonte", lat: -19.9167, lng: -43.9345, regiao: "Sudeste", area: 586528}
+  PA: {nome: "Pará", capital: "Belém", lat: -1.4558, lng: -48.5044, regiao: "Norte", area: 1247689}
+  PB: {nome: "Paraíba", capital: "João Pessoa", lat: -7.1195, lng: -34.8450, regiao: "Nordeste", area: 56440}
+  PR: {nome: "Paraná", capital: "Curitiba", lat: -25.4244, lng: -49.2654, regiao: "Sul", area: 199314}
+  PE: {nome: "Pernambuco", capital: "Recife", lat: -8.0476, lng: -34.8770, regiao: "Nordeste", area: 98312}
+  PI: {nome: "Piauí", capital: "Teresina", lat: -5.0892, lng: -42.8019, regiao: "Nordeste", area: 251529}
+  RJ: {nome: "Rio de Janeiro", capital: "Rio de Janeiro", lat: -22.9068, lng: -43.1729, regiao: "Sudeste", area: 43696}
+  RN: {nome: "Rio Grande do Norte", capital: "Natal", lat: -5.7945, lng: -35.2110, regiao: "Nordeste", area: 52797}
+  RS: {nome: "Rio Grande do Sul", capital: "Porto Alegre", lat: -30.0346, lng: -51.2177, regiao: "Sul", area: 281748}
+  RO: {nome: "Rondônia", capital: "Porto Velho", lat: -8.7619, lng: -63.9039, regiao: "Norte", area: 237576}
+  RR: {nome: "Roraima", capital: "Boa Vista", lat: 2.8235, lng: -60.6758, regiao: "Norte", area: 224299}
+  SC: {nome: "Santa Catarina", capital: "Florianópolis", lat: -27.5954, lng: -48.5480, regiao: "Sul", area: 95346}
+  SP: {nome: "São Paulo", capital: "São Paulo", lat: -23.5505, lng: -46.6333, regiao: "Sudeste", area: 248209}
+  SE: {nome: "Sergipe", capital: "Aracaju", lat: -10.9472, lng: -37.0731, regiao: "Nordeste", area: 21910}
+  TO: {nome: "Tocantins", capital: "Palmas", lat: -10.1840, lng: -48.3336, regiao: "Norte", area: 277621}
 
 # Configurações de transformação
 transformacao:

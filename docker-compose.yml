@@ -64,6 +64,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    restart: unless-stopped
     environment:
       AIRFLOW__CORE__EXECUTOR: CeleryExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-postgres/airflow
@@ -100,10 +101,13 @@ services:
     image: bndes-airflow:latest
     container_name: airflow_scheduler
     depends_on:
+      airflow-webserver:
+        condition: service_started
       airflow-postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+    restart: unless-stopped
     environment:
       AIRFLOW__CORE__EXECUTOR: CeleryExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-postgres/airflow
@@ -136,10 +140,13 @@ services:
     image: bndes-airflow:latest
     container_name: airflow_worker
     depends_on:
+      airflow-webserver:
+        condition: service_started
       airflow-postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+    restart: unless-stopped
     environment:
       AIRFLOW__CORE__EXECUTOR: CeleryExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-postgres/airflow
@@ -164,10 +171,6 @@ services:
     command: celery worker
     networks:
       - bndes_network
-
-
-
-
 
   # PostgreSQL dedicado para Metabase
   metabase-postgres:

@@ -12,6 +12,9 @@ from airflow.providers.postgres.hooks.postgres import PostgresHook
 from minio import Minio
 import io
 import logging
+import sys
+sys.path.append('/opt/airflow')
+from libs.helper_state_info import create_estados_table
 
 # Configurações do DAG
 default_args = {
@@ -252,5 +255,11 @@ load_task = PythonOperator(
     dag=dag,
 )
 
-# Pipeline ETL simples
-extract_transform_task >> load_task 
+# Task para criar tabela de estados
+create_estados_task = PythonOperator(
+    task_id='create_estados_table',
+    python_callable=lambda **context: create_estados_table(postgres_conn_id='bndes_postgres'),
+    dag=dag,
+)
+
+extract_transform_task >> [load_task, create_estados_task] 

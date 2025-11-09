@@ -135,6 +135,18 @@ make entrypoint-logs
 
 ## 🐛 Solução de Problemas
 
+### Metabase formata nomes de tabelas e colunas automaticamente
+
+**Problema**: O Metabase converte automaticamente nomes em snake_case (ex: `desembolsos_por_uf`) para formato "Title Case" com espaços (ex: "Desembolsos Por Uf").
+
+**Solução**:
+1. Acesse o Metabase: http://localhost:3000
+2. Vá em **Configurações** → **Admin** → **Tabelas, Raios X e Domínios**
+3. Desabilite a flag **"Nomes amigáveis de tabelas e campos"**
+4. Altere o valor de **"Substitua sublinhados e traços por espaços"** para **"Desabilitado"**
+
+Isso manterá os nomes originais das tabelas e colunas em snake_case.
+
 ### Metabase não mostra dados
 ```bash
 make bndes-setup

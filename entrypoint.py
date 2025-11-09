@@ -147,8 +147,32 @@ def create_admin_user():
     """Criar usuário admin se não existir."""
     print("👤 Criando usuário admin...")
     
+    # Verificar se usuário já existe
     try:
-        # Tentar criar usuário
+        result = subprocess.run(
+            ["airflow", "users", "list"],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        if "airflow" in result.stdout:
+            print("✅ Usuário 'airflow' já existe")
+            # Atualizar senha do usuário existente
+            try:
+                subprocess.run([
+                    "airflow", "users", "reset-password",
+                    "--username", "airflow",
+                    "--password", "airflow"
+                ], check=True, capture_output=True)
+                print("✅ Senha do usuário 'airflow' atualizada")
+            except subprocess.CalledProcessError as e:
+                print(f"⚠️ Falha ao atualizar senha: {e.stderr}")
+            return
+    except subprocess.CalledProcessError:
+        pass
+    
+    # Criar novo usuário
+    try:
         subprocess.run([
             "airflow", "users", "create",
             "--username", "airflow",
@@ -157,24 +181,20 @@ def create_admin_user():
             "--role", "Admin",
             "--email", "admin@example.com",
             "--password", "airflow"
-        ], check=True, capture_output=True)
-        print("✅ Usuário admin criado com sucesso")
-    except subprocess.CalledProcessError:
+        ], check=True, capture_output=True, text=True)
+        print("✅ Usuário 'airflow' criado com sucesso")
+    except subprocess.CalledProcessError as e:
+        print(f"⚠️ Falha ao criar usuário: {e.stderr}")
+        # Tentar resetar senha se usuário existir mas com senha diferente
         try:
-            # Se falhar, tentar substituir
             subprocess.run([
-                "airflow", "users", "create",
+                "airflow", "users", "reset-password",
                 "--username", "airflow",
-                "--firstname", "Admin",
-                "--lastname", "User",
-                "--role", "Admin",
-                "--email", "admin@example.com",
-                "--password", "airflow",
-                "--replace"
-            ], check=True, capture_output=True)
-            print("✅ Usuário admin atualizado com sucesso")
+                "--password", "airflow"
+            ], check=True, capture_output=True, text=True)
+            print("✅ Senha do usuário 'airflow' resetada")
         except subprocess.CalledProcessError:
-            print("⚠️ Usuário admin já existe ou criação falhou")
+            print("⚠️ Não foi possível criar ou atualizar usuário")
 
 
 def ensure_default_pool():
@@ -217,21 +237,40 @@ def main():
     if not wait_for_redis():
         sys.exit(1)
     
-    # Verificar e inicializar banco se necessário
-    if not check_database_initialized():
-        if not initialize_database():
-            sys.exit(1)
+    # Detectar qual comando está sendo executado
+    command = sys.argv[1] if len(sys.argv) > 1 else None
+    is_worker = command == "celery" and len(sys.argv) > 2 and sys.argv[2] == "worker"
     
-    # Criar usuário admin
-    create_admin_user()
-    
-    # Garantir pool padrão
-    ensure_default_pool()
-    
-    # Executar setup personalizado
-    run_airflow_setup()
-    
-    print("✅ Setup do Airflow concluído!")
+    # Apenas webserver inicializa banco e cria usuário
+    # Scheduler e worker apenas aguardam banco estar pronto
+    if command == "webserver":
+        # Verificar e inicializar banco se necessário
+        if not check_database_initialized():
+            if not initialize_database():
+                sys.exit(1)
+        
+        # Criar usuário admin apenas no webserver
+        create_admin_user()
+        
+        # Garantir pool padrão
+        ensure_default_pool()
+        
+        # Executar setup personalizado
+        run_airflow_setup()
+        
+        print("✅ Setup do Airflow concluído!")
+    elif command in ["scheduler"] or is_worker:
+        # Para scheduler e worker, apenas aguardar banco estar pronto
+        # Não inicializar banco nem criar usuário
+        print("⏳ Aguardando banco estar totalmente inicializado...")
+        max_wait = 60
+        for i in range(max_wait):
+            if check_database_initialized():
+                print("✅ Banco está pronto!")
+                break
+            time.sleep(1)
+        else:
+            print("⚠️ Banco pode não estar totalmente inicializado, mas continuando...")
     
     # Executar o comando principal
     if len(sys.argv) > 1:
