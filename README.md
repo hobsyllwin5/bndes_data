@@ -49,6 +49,12 @@ Este comando extrai dados do BNDES e carrega no PostgreSQL.
 - **Metabase**: http://localhost:3000
   - Email: `bndes_data@student.com`
   - Senha: `bndes_data123`
+  - **Conexão PostgreSQL BNDES** (adicionar como fonte de dados):
+    - Host: `bndes_postgres`
+    - Porta: `5432`
+    - Database: `bndes_data`
+    - User: `bndes_user`
+    - Password: `bndes_password`
 - **Airflow**: http://localhost:8080
   - Usuário: `airflow`
   - Senha: `airflow`
@@ -98,7 +104,7 @@ bndes_project/
 │   └── bndes_transformation_dag.py
 ├── config/                   # Configurações
 ├── libs/                     # Bibliotecas compartilhadas
-├── docker-compose.yml        # Infraestrutura
+├── docker compose.yml        # Infraestrutura
 ├── Dockerfile                # Imagem customizada do Airflow
 ├── entrypoint.py             # Script de inicialização automática
 ├── Makefile                  # Automação
@@ -201,19 +207,19 @@ def validate_data_quality(**context):
 #### DAG não aparece:
 ```bash
 # Verificar erros de sintaxe
-docker-compose exec airflow-webserver airflow dags list
+docker compose exec airflow-webserver airflow dags list
 
 # Verificar logs do scheduler
-docker-compose logs airflow-scheduler
+docker compose logs airflow-scheduler
 ```
 
 #### Logs não aparecem no MinIO:
 ```bash
 # Verificar conexão minio_s3
-docker-compose exec airflow-webserver airflow connections list
+docker compose exec airflow-webserver airflow connections list
 
 # Testar conexão manualmente
-docker-compose exec airflow-webserver python -c "
+docker compose exec airflow-webserver python -c "
 import boto3
 s3 = boto3.client('s3', endpoint_url='http://minio:9000', 
                   aws_access_key_id='minioadmin', 
@@ -233,12 +239,12 @@ print(s3.list_buckets())
 make entrypoint-logs
 
 # Verificar health checks
-docker-compose ps
+docker compose ps
 
 # Rebuild se necessário
-docker-compose down -v
-docker-compose build
-docker-compose up
+docker compose down -v
+docker compose build
+docker compose up
 ```
 
 ### Logs e Monitoramento
@@ -251,15 +257,15 @@ docker-compose up
 #### Comandos úteis para monitoramento:
 ```bash
 # Ver logs em tempo real
-docker-compose logs -f airflow-scheduler
-docker-compose logs -f airflow-worker
+docker compose logs -f airflow-scheduler
+docker compose logs -f airflow-worker
 
 # Reiniciar serviços específicos
-docker-compose restart airflow-webserver
-docker-compose restart airflow-scheduler
+docker compose restart airflow-webserver
+docker compose restart airflow-scheduler
 
 # Acessar container para debug
-docker-compose exec airflow-webserver bash
+docker compose exec airflow-webserver bash
 ```
 
 ## 📈 Roadmap

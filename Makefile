@@ -32,9 +32,9 @@ help: ## Mostra esta ajuda
 
 bndes-start: ## Inicia infraestrutura BNDES completa (recomendado)
 	@echo "$(BLUE)Iniciando infraestrutura BNDES...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) down 2>/dev/null || true
+	@docker compose -f $(COMPOSE_FILE) down 2>/dev/null || true
 	@echo "$(YELLOW)📦 Subindo containers BNDES...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) up -d
+	@docker compose -f $(COMPOSE_FILE) up -d
 	@echo "$(YELLOW)⏳ Aguardando serviços inicializarem...$(NC)"
 	@sleep 30
 	@$(MAKE) bndes-setup
@@ -47,7 +47,7 @@ bndes-start: ## Inicia infraestrutura BNDES completa (recomendado)
 
 bndes-stop: ## Para toda a infraestrutura BNDES
 	@echo "$(YELLOW)🛑 Parando infraestrutura BNDES...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) down
+	@docker compose -f $(COMPOSE_FILE) down
 	@echo "$(GREEN)✅ Infraestrutura BNDES parada$(NC)"
 
 bndes-pipeline: ## Executa pipeline completo de dados BNDES
@@ -89,7 +89,7 @@ bndes-setup: ## Configura Metabase automaticamente para BNDES
 
 bndes-status: ## Status completo da infraestrutura BNDES
 	@echo "$(BLUE)📊 Status da infraestrutura BNDES:$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) ps
+	@docker compose -f $(COMPOSE_FILE) ps
 	@echo ""
 	@echo "$(BLUE)🌐 Status dos serviços BNDES:$(NC)"
 	@echo -n "  Airflow:  "
@@ -113,7 +113,7 @@ bndes-data: ## Verifica dados BNDES carregados no PostgreSQL
 # Comandos genéricos
 clean: ## Remove tudo - reset completo do projeto
 	@echo "$(RED)🧹 Limpeza completa do projeto BNDES...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) down -v --remove-orphans
+	@docker compose -f $(COMPOSE_FILE) down -v --remove-orphans
 	@docker volume rm $(PROJECT_NAME)_metabase_data $(PROJECT_NAME)_metabase_postgres_data 2>/dev/null || true
 	@docker volume rm $(PROJECT_NAME)_postgres_data $(PROJECT_NAME)_airflow_postgres_data 2>/dev/null || true
 	@docker volume rm $(PROJECT_NAME)_minio_data $(PROJECT_NAME)_airflow_logs 2>/dev/null || true
@@ -122,19 +122,19 @@ clean: ## Remove tudo - reset completo do projeto
 
 logs: ## Logs em tempo real dos serviços principais
 	@echo "$(BLUE)📋 Logs da infraestrutura BNDES:$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) logs --tail=50 -f airflow-webserver airflow-scheduler bndes_metabase bndes_postgres
+	@docker compose -f $(COMPOSE_FILE) logs --tail=50 -f airflow-webserver airflow-scheduler bndes_metabase bndes_postgres
 
 entrypoint-logs: ## Logs específicos do entrypoint (nova funcionalidade)
 	@echo "$(BLUE)Logs do entrypoint do Airflow:$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) logs airflow-webserver | grep "✅\|❌\|⏳\|🔍\|🗄️\|👤\|🏊\|🔧"
+	@docker compose -f $(COMPOSE_FILE) logs airflow-webserver | grep "✅\|❌\|⏳\|🔍\|🗄️\|👤\|🏊\|🔧"
 
 dev: ## Modo desenvolvimento - sobe com logs em tempo real
 	@echo "$(BLUE)🛠️ Modo desenvolvimento BNDES - logs em tempo real$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) up
+	@docker compose -f $(COMPOSE_FILE) up
 
 build: ## Reconstrói imagens do Airflow (desenvolvimento)
 	@echo "$(YELLOW)🔨 Reconstruindo imagem do Airflow...$(NC)"
-	@docker-compose -f $(COMPOSE_FILE) build --no-cache
+	@docker compose -f $(COMPOSE_FILE) build --no-cache
 
 reset: clean bndes-start ## Reset completo - limpa tudo e reinicia
 
