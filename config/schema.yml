@@ -25,9 +25,9 @@ desembolsos_por_uf:
       constraints: "NOT NULL"
       description: "Código UF padronizado (ex: SP, RJ)"
     valor_desembolso:
-      type: "DECIMAL(12,2)"
+      type: "DECIMAL(15,8)"
       constraints: ""
-      description: "Valor do desembolso em reais (centavos)"
+      description: "Valor do desembolso em R$ milhões (preserva precisão decimal)"
     updated_at:
       type: "TIMESTAMP"
       constraints: "DEFAULT NOW()"
@@ -152,7 +152,7 @@ transformacao:
   validacao:
     valor_minimo: 0
     valor_maximo: 999999999
-    casas_decimais: 2
+    casas_decimais: 8
     
   formato_periodo:
     tipo: "date"  # YYYY-MM-DD

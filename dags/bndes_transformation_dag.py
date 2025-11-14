@@ -105,9 +105,9 @@ def extract_and_transform(**context):
         dados_verticalizados = []
         
         for _, row in df_original.iterrows():
-            ano = int(row['ano'])
+            ano_int = int(row['ano'])
             mes = int(row['mes'])
-            periodo = pd.to_datetime(f"{ano}-{mes:02d}-01").date()
+            periodo = pd.to_datetime(f"{ano_int}-{mes:02d}-01").date()
             
             # Para cada UF, criar um registro
             for estado_nome in uf_columns:
@@ -122,7 +122,7 @@ def extract_and_transform(**context):
                         # Aplicar validações do schema (sem limpeza adicional)
                         if validacao['valor_minimo'] <= valor_float <= validacao['valor_maximo']:
                             dados_verticalizados.append({
-                                'ano': ano,
+                                'ano': ano_int,
                                 'mes': mes,
                                 'periodo': periodo,
                                 'uf': uf_codigo,
