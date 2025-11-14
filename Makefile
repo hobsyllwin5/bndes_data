@@ -48,6 +48,9 @@ bndes-start: ## Inicia infraestrutura BNDES completa (recomendado)
 bndes-stop: ## Para toda a infraestrutura BNDES
 	@echo "$(YELLOW)🛑 Parando infraestrutura BNDES...$(NC)"
 	@docker compose -f $(COMPOSE_FILE) down
+	@echo "$(YELLOW)Parando containers Metabase e MinIO restantes...$(NC)"
+	@docker stop $$(docker ps -q --filter "name=metabase" 2>/dev/null) $$(docker ps -q --filter "name=minio" 2>/dev/null) 2>/dev/null || true
+	@docker rm $$(docker ps -aq --filter "name=metabase" 2>/dev/null) $$(docker ps -aq --filter "name=minio" 2>/dev/null) 2>/dev/null || true
 	@echo "$(GREEN)✅ Infraestrutura BNDES parada$(NC)"
 
 bndes-pipeline: ## Executa pipeline completo de dados BNDES
