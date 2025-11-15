@@ -9,6 +9,8 @@ import sys
 import time
 import subprocess
 import psycopg2
+import yaml
+from pathlib import Path
 from psycopg2 import OperationalError
 
 
@@ -143,9 +145,48 @@ def initialize_database():
         return False
 
 
+def load_airflow_config():
+    """Carrega configurações do Airflow do config.yml"""
+    try:
+        # Tentar diferentes caminhos (Docker e local)
+        possible_paths = [
+            '/opt/airflow/config/config.yml',  # Docker
+            'config/config.yml',  # Local
+            Path(__file__).parent / 'config' / 'config.yml'  # Relativo
+        ]
+        
+        for path in possible_paths:
+            path_obj = Path(path) if isinstance(path, str) else path
+            if path_obj.exists():
+                with open(path_obj, 'r', encoding='utf-8') as file:
+                    config = yaml.safe_load(file)
+                    return config.get('airflow', {})
+        
+        # Fallback para valores padrão
+        print("⚠️ config.yml não encontrado, usando valores padrão")
+        return {
+            'admin_username': 'airflow',
+            'admin_password': 'airflow',
+            'admin_email': 'admin@example.com'
+        }
+    except Exception as e:
+        print(f"⚠️ Erro ao carregar config.yml: {e}, usando valores padrão")
+        return {
+            'admin_username': 'airflow',
+            'admin_password': 'airflow',
+            'admin_email': 'admin@example.com'
+        }
+
+
 def create_admin_user():
     """Criar usuário admin se não existir."""
     print("👤 Criando usuário admin...")
+    
+    # Carregar configurações
+    airflow_config = load_airflow_config()
+    username = airflow_config.get('admin_username', 'airflow')
+    password = airflow_config.get('admin_password', 'airflow')
+    email = airflow_config.get('admin_email', 'admin@example.com')
     
     # Verificar se usuário já existe
     try:
@@ -155,16 +196,16 @@ def create_admin_user():
             text=True,
             check=True
         )
-        if "airflow" in result.stdout:
-            print("✅ Usuário 'airflow' já existe")
+        if username in result.stdout:
+            print(f"✅ Usuário '{username}' já existe")
             # Atualizar senha do usuário existente
             try:
                 subprocess.run([
                     "airflow", "users", "reset-password",
-                    "--username", "airflow",
-                    "--password", "airflow"
+                    "--username", username,
+                    "--password", password
                 ], check=True, capture_output=True)
-                print("✅ Senha do usuário 'airflow' atualizada")
+                print(f"✅ Senha do usuário '{username}' atualizada")
             except subprocess.CalledProcessError as e:
                 print(f"⚠️ Falha ao atualizar senha: {e.stderr}")
             return
@@ -175,24 +216,24 @@ def create_admin_user():
     try:
         subprocess.run([
             "airflow", "users", "create",
-            "--username", "airflow",
+            "--username", username,
             "--firstname", "Admin",
             "--lastname", "User",
             "--role", "Admin",
-            "--email", "admin@example.com",
-            "--password", "airflow"
+            "--email", email,
+            "--password", password
         ], check=True, capture_output=True, text=True)
-        print("✅ Usuário 'airflow' criado com sucesso")
+        print(f"✅ Usuário '{username}' criado com sucesso")
     except subprocess.CalledProcessError as e:
         print(f"⚠️ Falha ao criar usuário: {e.stderr}")
         # Tentar resetar senha se usuário existir mas com senha diferente
         try:
             subprocess.run([
                 "airflow", "users", "reset-password",
-                "--username", "airflow",
-                "--password", "airflow"
+                "--username", username,
+                "--password", password
             ], check=True, capture_output=True, text=True)
-            print("✅ Senha do usuário 'airflow' resetada")
+            print(f"✅ Senha do usuário '{username}' resetada")
         except subprocess.CalledProcessError:
             print("⚠️ Não foi possível criar ou atualizar usuário")
 

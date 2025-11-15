@@ -291,5 +291,5 @@ Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para detalhes.
 ## 🆘 Suporte
 
 - **Issues**: Use o GitHub Issues para reportar bugs
-- **Email**: bndes_data@student.com
+- **Email**: lucasbrandao.finance@gmail.com
 - **Documentação**: Este README e comentários no código 

@@ -42,11 +42,11 @@ airflow:
   webserver_url: "http://localhost:8080"
   admin_username: "airflow"
   admin_password: "airflow"
-  admin_email: "admin@bndes.local"
+  admin_email: "bndes_data@student.com"
 
 # Configurações do Metabase
 metabase:
   url: "http://metabase:3000"
   database_name: "BNDES Data"
-  admin_email: "admin@bndes.local"
-  admin_password: "*adminpasswd123"
+  admin_email: "bndes_data@student.com"
+  admin_password: "bndes_data123"

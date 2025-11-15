@@ -8,6 +8,7 @@ import os
 import sys
 from airflow.models import Connection
 from airflow.utils.db import provide_session
+from libs.config_manager import ConfigYml
 
 @provide_session
 def create_minio_connection(session=None):
@@ -23,18 +24,21 @@ def create_minio_connection(session=None):
         print(f"✅ Conexão '{conn_id}' já existe")
         return
     
+    # Carregar configurações do MinIO
+    minio_config = ConfigYml.get_minio_config()
+    
     # Criar nova conexão
     new_conn = Connection(
         conn_id=conn_id,
         conn_type='aws',
         host='minio:9000',  # Nome do serviço no Docker
-        login='minioadmin',
-        password='minioadmin123',
+        login=minio_config['access_key'],
+        password=minio_config['secret_key'],
         extra={
-            "aws_access_key_id": "minioadmin",
-            "aws_secret_access_key": "minioadmin123",
-            "endpoint_url": "http://minio:9000",
-            "region_name": "us-east-1"
+            "aws_access_key_id": minio_config['access_key'],
+            "aws_secret_access_key": minio_config['secret_key'],
+            "endpoint_url": minio_config['endpoint_url'],
+            "region_name": minio_config.get('region', 'us-east-1')
         }
     )
     
@@ -56,15 +60,18 @@ def create_postgres_connection(session=None):
         print(f"✅ Conexão '{conn_id}' já existe")
         return
     
+    # Carregar configurações do PostgreSQL
+    db_config = ConfigYml.get_database_config()
+    
     # Criar nova conexão
     new_conn = Connection(
         conn_id=conn_id,
         conn_type='postgres',
-        host='postgres',  # Nome do serviço no Docker
-        port=5432,
-        schema='bndes_data',
-        login='bndes_user',
-        password='bndes_password'
+        host=db_config['host'],
+        port=db_config['port'],
+        schema=db_config['database'],
+        login=db_config['user'],
+        password=db_config['password']
     )
     
     session.add(new_conn)
