@@ -272,14 +272,6 @@ docker compose restart airflow-scheduler
 docker compose exec airflow-webserver bash
 ```
 
-## 📈 Roadmap
-
-- [ ] Dashboards pré-configurados no Metabase
-- [ ] Alertas automáticos por email/Slack
-- [ ] API para consulta de dados
-- [ ] Testes automatizados
-- [ ] CI/CD pipeline
-
 ## 🤝 Contribuição
 
 1. Fork o projeto
