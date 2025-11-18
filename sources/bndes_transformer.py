@@ -21,7 +21,6 @@ def _extract_from_minio(bucket_name: str, prefixes: list) -> pd.DataFrame:
     config = ConfigYml.load_config()
     minio_config = config['minio']
     
-    # Conectar ao MinIO
     minio_client = Minio(
         'minio:9000',
         access_key=minio_config['access_key'],
@@ -29,7 +28,6 @@ def _extract_from_minio(bucket_name: str, prefixes: list) -> pd.DataFrame:
         secure=False
     )
     
-    # Buscar CSVs nos prefixos
     csv_objects = []
     for prefix in prefixes:
         objects = list(minio_client.list_objects(bucket_name, prefix=prefix, recursive=True))
@@ -38,11 +36,9 @@ def _extract_from_minio(bucket_name: str, prefixes: list) -> pd.DataFrame:
     if not csv_objects:
         raise ValueError("Nenhum arquivo CSV encontrado no MinIO")
     
-    # Pegar o mais recente
     latest_csv = max(csv_objects, key=lambda x: x.last_modified)
     logging.info(f"📄 Processando: {latest_csv.object_name}")
     
-    # Baixar e ler
     csv_data = minio_client.get_object(bucket_name, latest_csv.object_name)
     df = pd.read_csv(io.BytesIO(csv_data.read()))
     
@@ -100,18 +96,15 @@ def extract_and_transform(**context):
         
         config = _load_schema_config()
         
-        # Extract
         bucket_name = ConfigYml.load_config()['minio']['bucket_name']
         prefixes = ['desembolsos_por_uf/', 'bndes/desembolsos_por_uf/']
         df_raw, arquivo_origem = _extract_from_minio(bucket_name, prefixes)
         
         logging.info(f"📊 Dados originais: {len(df_raw)} linhas, {len(df_raw.columns)} colunas")
         
-        # Transform
         df_transformed = _transform_bndes_data(df_raw, config)
         logging.info(f"✅ Verticalização concluída: {len(df_transformed)} registros")
         
-        # Retornar para próxima task
         result = {
             'data': df_transformed.to_json(orient='records', date_format='iso'),
             'total_registros': len(df_transformed),

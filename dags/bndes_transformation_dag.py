@@ -10,7 +10,7 @@ sys.path.append('/opt/airflow')
 
 
 default_args = {
-    'owner': 'bndes-team',
+    'owner': 'data-student',
     'depends_on_past': False,
     'start_date': datetime(2025, 1, 1),
     'email_on_failure': False,

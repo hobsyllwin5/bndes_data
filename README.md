@@ -1,15 +1,17 @@
-# BNDES Data Pipeline
+# BNDES Data Student Pipeline
 
-Pipeline de dados automatizado para extração, transformação e visualização de dados do BNDES (Banco Nacional de Desenvolvimento Econômico e Social).
+Projeto educacional de pipeline de dados para estudo de engenharia de dados e Business Intelligence, utilizando dados do BNDES (Banco Nacional de Desenvolvimento Econômico e Social).
 
 ## 📋 Visão Geral
 
-Este projeto implementa um pipeline de dados completo que:
+Este projeto educacional implementa um pipeline de dados completo para fins de estudo, demonstrando:
 - **Extrai** dados da API do BNDES
 - **Armazena** no MinIO (Data Lake)
 - **Transforma** os dados usando Airflow
 - **Carrega** no PostgreSQL
-- **Visualiza** através do Metabase
+- **Visualiza** através do Metabase (Business Intelligence)
+
+**Objetivo Educacional**: Projeto para estudo prático de engenharia de dados e Business Intelligence.
 
 ## 🏗️ Arquitetura
 
@@ -17,17 +19,20 @@ Este projeto implementa um pipeline de dados completo que:
 API BNDES → Airflow → MinIO (Data Lake) → PostgreSQL → Metabase (BI)
 ```
 
-### Componentes:
-- **Airflow**: Orquestração dos pipelines de dados
-- **PostgreSQL**: Banco de dados para dados processados
-- **MinIO**: Data Lake para armazenamento de dados brutos
-- **Metabase**: Interface de BI para dashboards e visualizações
+### Componentes da Stack de Engenharia de Dados
 
-## Início Rápido
+Este projeto utiliza uma stack completa de engenharia de dados para fins educacionais:
+
+- **Airflow**: Orquestração dos pipelines de dados (aprendizado de workflows e automação)
+- **PostgreSQL**: Banco de dados relacional para dados processados (aprendizado de modelagem e SQL)
+- **MinIO**: Data Lake para armazenamento de dados brutos (aprendizado de arquitetura de dados)
+- **Metabase**: Interface de Business Intelligence para dashboards e visualizações (aprendizado de BI e análise de dados)
+
+## 🚀 Início Rápido
 
 ### Pré-requisitos
-- Docker & Docker Compose
-- Make (presente na maioria dos sistemas Linux/Mac)
+- **Docker & Docker Compose**
+- **Make** (presente na maioria dos sistemas Linux/Mac)
 
 ### 1. Subir toda a infraestrutura
 ```bash
@@ -141,7 +146,7 @@ make entrypoint-logs
 
 ## 🐛 Solução de Problemas
 
-### Metabase formata nomes de tabelas e colunas automaticamente
+#### Metabase formata nomes de tabelas e colunas automaticamente
 
 **Problema**: O Metabase converte automaticamente nomes em snake_case (ex: `desembolsos_por_uf`) para formato "Title Case" com espaços (ex: "Desembolsos Por Uf").
 
@@ -153,29 +158,29 @@ make entrypoint-logs
 
 Isso manterá os nomes originais das tabelas e colunas em snake_case.
 
-### Metabase não mostra dados
+#### Metabase não mostra dados
 ```bash
 make bndes-setup
 ```
 
-### DAGs com erro
+#### DAGs com erro
 ```bash
 make logs
 # Verifique os logs do Airflow
 ```
 
-### Reset completo
+#### Reset completo
 ```bash
 make clean
 make bndes-start
 ```
 
-### Portas em uso
+#### Portas em uso
 Certifique-se que as portas estão livres:
-- 3000 (Metabase)
-- 8080 (Airflow)
-- 5432 (PostgreSQL)
-- 9000/9001 (MinIO)
+- **3000** (Metabase)
+- **8080** (Airflow)
+- **5432** (PostgreSQL)
+- **9000/9001** (MinIO)
 
 ## 🔧 Configuração do Airflow
 
@@ -204,7 +209,7 @@ def validate_data_quality(**context):
 
 ### Troubleshooting
 
-#### DAG não aparece:
+#### DAG não aparece
 ```bash
 # Verificar erros de sintaxe
 docker compose exec airflow-webserver airflow dags list
@@ -213,7 +218,7 @@ docker compose exec airflow-webserver airflow dags list
 docker compose logs airflow-scheduler
 ```
 
-#### Logs não aparecem no MinIO:
+#### Logs não aparecem no MinIO
 ```bash
 # Verificar conexão minio_s3
 docker compose exec airflow-webserver airflow connections list
@@ -228,12 +233,11 @@ print(s3.list_buckets())
 "
 ```
 
-#### Erro de extração:
+#### Erro de extração
 1. Verificar se MinIO está rodando
 2. Verificar configuração em `config/config.yml`
-3. Testar script manualmente: `python bndes_data_explorer.py`
 
-#### Problemas de inicialização:
+#### Problemas de inicialização
 ```bash
 # Ver logs do sistema de inicialização
 make entrypoint-logs
@@ -249,12 +253,12 @@ docker compose up
 
 ### Logs e Monitoramento
 
-#### Logs Remotos no MinIO:
+#### Logs Remotos no MinIO
 - **Logs do Airflow** salvos em: `s3://airflow-logs`
 - **Dados BNDES** salvos em: `s3://bndes-data`
 - **Interface MinIO**: http://localhost:9001
 
-#### Comandos úteis para monitoramento:
+#### Comandos úteis para monitoramento
 ```bash
 # Ver logs em tempo real
 docker compose logs -f airflow-scheduler
@@ -286,7 +290,7 @@ docker compose exec airflow-webserver bash
 
 ## 📄 Licença
 
-Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para detalhes.
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para detalhes.
 
 ## 🆘 Suporte
 

@@ -35,21 +35,17 @@ def extract_data(
     if save_formats is None:
         save_formats = ['csv', 'json']
     
-    # Fetch
     df = fetch_func(resource_id, **fetch_kwargs)
     
-    # Validate
     if df is None or df.empty:
         raise ValueError("Nenhum dado foi extraído")
     
-    # Save
     saved_files = []
     for fmt in save_formats:
         result = save_func(df, resource_name, fmt)
         if result:
             saved_files.append(result)
     
-    # Stats
     stats = {
         'status': 'success',
         'records_count': len(df),
