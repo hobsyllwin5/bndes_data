@@ -56,7 +56,7 @@ bndes-stop: ## Para toda a infraestrutura BNDES
 bndes-pipeline: ## Executa pipeline completo de dados BNDES
 	@echo "$(BLUE)🔄 Executando pipeline de dados BNDES...$(NC)"
 	@echo "$(YELLOW)1. Executando extração de dados BNDES...$(NC)"
-	@curl -s -X POST -u airflow:airflow "http://localhost:8080/api/v1/dags/bndes_extraction/dagRuns" \
+	@curl -s -X POST -u airflow:airflow "http://localhost:8080/api/v1/dags/bndes_data_extraction/dagRuns" \
 		-H "Content-Type: application/json" \
 		-d '{"dag_run_id":"manual_$$(date +%Y%m%d_%H%M%S)", "conf":{}}' > /dev/null || echo "$(RED)Erro na extração$(NC)"
 	@sleep 10

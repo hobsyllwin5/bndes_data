@@ -109,7 +109,7 @@ bndes_project/
 │   └── bndes_transformation_dag.py
 ├── config/                   # Configurações
 ├── libs/                     # Bibliotecas compartilhadas
-├── docker compose.yml        # Infraestrutura
+├── docker-compose.yml        # Infraestrutura
 ├── Dockerfile                # Imagem customizada do Airflow
 ├── entrypoint.py             # Script de inicialização automática
 ├── Makefile                  # Automação
@@ -187,43 +187,27 @@ Certifique-se que as portas estão livres:
 ### DAGs Disponíveis
 
 #### bndes_data_extraction
-- **Frequência**: Diária (`@daily`)
-- **Horário**: 00:00 UTC
+- **Frequência**: Manual (`schedule_interval=None`)
 - **Retry**: 2 tentativas com 5min de intervalo
 - **Tasks**:
-  1. `extract_bndes_data`: Extrai dados da API
-  2. `validate_data_quality`: Valida qualidade dos dados
+  1. `extract_bndes_data`: Extrai dados da API para o MinIO
 
-### Personalizar DAGs
-Edite: `dags/bndes_extraction_dag.py`
-
-```python
-# Alterar frequência
-schedule_interval='@weekly'  # ou '0 6 * * *' para 6h da manhã
-
-# Adicionar mais validações
-def validate_data_quality(**context):
-    # Suas validações customizadas aqui
-    pass
-```
-
-### Troubleshooting
-
-#### DAG não aparece
-```bash
-# Verificar erros de sintaxe
-docker compose exec airflow-webserver airflow dags list
-
-# Verificar logs do scheduler
-docker compose logs airflow-scheduler
-```
+#### bndes_transformation
+- **Frequência**: Manual (`schedule_interval=None`)
+- **Retry**: 1 tentativa com 3min de intervalo
+- **Tasks**:
+  1. `extract_and_transform`: Extrai do MinIO e Transforma o dataframe para o PostgreSQL
+  2. `load_to_postgres`: Carrega o dataframe transformado no PostgreSQL
+  3. `create_estados_table`: Cria tabela auxiliar de estados brasileiros
 
 #### Logs não aparecem no MinIO
-```bash
-# Verificar conexão minio_s3
-docker compose exec airflow-webserver airflow connections list
+Os logs remotos do Airflow dependem da conexão `minio_s3`. Verifique se a conexão existe:
 
-# Testar conexão manualmente
+```bash
+# Verificar se a conexão minio_s3 está configurada
+docker compose exec airflow-webserver airflow connections list | grep minio_s3
+
+# Testar conexão com MinIO manualmente
 docker compose exec airflow-webserver python -c "
 import boto3
 s3 = boto3.client('s3', endpoint_url='http://minio:9000', 
