@@ -73,7 +73,8 @@ def _transform_bndes_data(df: pd.DataFrame, config: dict) -> pd.DataFrame:
             
             if pd.notna(valor):
                 try:
-                    valor_float = float(valor)
+                    valor_float = float(valor)                    
+                    valor_unidades = valor_float * 1_000_000
                     
                     if validacao['valor_minimo'] <= valor_float <= validacao['valor_maximo']:
                         dados_verticalizados.append({
@@ -81,7 +82,7 @@ def _transform_bndes_data(df: pd.DataFrame, config: dict) -> pd.DataFrame:
                             'mes': mes,
                             'periodo': periodo,
                             'uf': uf_codigo,
-                            'valor_desembolso': round(valor_float, validacao['casas_decimais'])
+                            'valor_desembolso': round(valor_unidades, validacao['casas_decimais'])
                         })
                 except (ValueError, TypeError):
                     continue

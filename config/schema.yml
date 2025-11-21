@@ -27,7 +27,7 @@ desembolsos_por_uf:
     valor_desembolso:
       type: "DECIMAL(15,8)"
       constraints: ""
-      description: "Valor do desembolso em R$ milhões (preserva precisão decimal)"
+      description: "Valor do desembolso em R$ (unidades, convertido de milhões)"
     updated_at:
       type: "TIMESTAMP"
       constraints: "DEFAULT NOW()"
